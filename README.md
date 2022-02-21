@@ -1,4 +1,7 @@
 # Computational-Fluid-Dynamics-Machine-Learning-Examples
+
+> Updated and tested using Python 3.8 on WSL Ubuntu 20.04
+
 This repo contains tutorial type programs showing some basic ways Neural Networks can be applied to CFD. The purpose of this is to give those who are familiar with CFD but not Neural Networks a few very simple examples of applications. In particular, there is an example for predicting drag from the boundary conditions as well as predicting the velocity and pressure field from the boundary conditions.
 
 The Neural Network code is written with the popular and easy to use [Keras](https://keras.io/) library. [OpenLB](http://optilb.org/openlb/) is used to generate the simulation data needed for training.
@@ -15,8 +18,8 @@ You will need the following packages to run all the code. Mpi stuff for OpenLB a
 
 ```
 sudo apt-get update
-sudo apt-get install g++ openmpi-bin openmpi-doc libopenmpi-dev make python-vtk python-tk
-sudo pip install tqdm keras tensorflow matplotlib
+sudo apt-get install g++ openmpi-bin openmpi-doc libopenmpi-dev make python3-vtk7 python-tk
+sudo pip install -r requirements.txt
 ```
 
 Note, if you want the gpu version of Tensorflow you need to install `tensorflow-gpu` and follow the instructions [here](https://www.tensorflow.org/install/install_linux). Also, depending how python vtk is install it can cause problems. If the above instructions are followed without a prior install of vtk then there should be no problem.

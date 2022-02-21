@@ -6,9 +6,16 @@ Gets to 99.25% test accuracy after 12 epochs
 '''
 
 # keras import stuff
+import tensorflow as tf
 import keras
 from keras.models import Model
-from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose
+from keras.layers import (
+    Input,
+    concatenate,
+    Conv2D,
+    MaxPooling2D,
+    Conv2DTranspose
+)
 from keras.layers.convolutional import ZeroPadding2D
 from keras import backend as K
 
@@ -21,7 +28,7 @@ import matplotlib.pyplot as plt
 
 # training params
 batch_size = 32
-epochs = 100 # number of times through training set
+epochs = 100  # number of times through training set
 
 # load dataset
 dataset = VTK_data("../data")
@@ -73,34 +80,43 @@ conv5 = Conv2D(512, (3, 3), activation='relu', padding='same')(pool4)
 conv5 = Conv2D(512, (3, 3), activation='relu', padding='same')(conv5)
 
 # 1 3x3 transpose convolution and concate conv4 on the depth dim
-up6 = concatenate([ZeroPadding2D(((1,0),(1,0)))(Conv2DTranspose(256, (2, 2), strides=(2, 2), padding='same')(conv5)), conv4], axis=3)
+up6 = concatenate([ZeroPadding2D(((1, 0), (1, 0)))(
+    Conv2DTranspose(256, (2, 2), strides=(2, 2), padding='same')(conv5)
+), conv4], axis=3)
 
 # 2 3x3 convolutions
 conv6 = Conv2D(256, (3, 3), activation='relu', padding='same')(up6)
 conv6 = Conv2D(256, (3, 3), activation='relu', padding='same')(conv6)
 
 # 1 3x3 transpose convolution and concate conv3 on the depth dim
-up7 = concatenate([ZeroPadding2D(((1,0),(1,0)))(Conv2DTranspose(128, (2, 2), strides=(2, 2), padding='same')(conv6)), conv3], axis=3)
+up7 = concatenate([ZeroPadding2D(((1, 0), (1, 0)))(
+    Conv2DTranspose(128, (2, 2), strides=(2, 2), padding='same')(conv6)
+), conv3], axis=3)
 
 # 2 3x3 convolutions
 conv7 = Conv2D(128, (3, 3), activation='relu', padding='same')(up7)
 conv7 = Conv2D(128, (3, 3), activation='relu', padding='same')(conv7)
 
 # 1 3x3 transpose convolution and concate conv3 on the depth dim
-up8 = concatenate([ZeroPadding2D(((0,0),(1,0)))(Conv2DTranspose(64, (2, 2), strides=(2, 2), padding='same')(conv7)), conv2], axis=3)
+up8 = concatenate([ZeroPadding2D(((0, 0), (1, 0)))(
+    Conv2DTranspose(64, (2, 2), strides=(2, 2), padding='same')(conv7)
+), conv2], axis=3)
 
 # 2 3x3 convolutions
 conv8 = Conv2D(64, (3, 3), activation='relu', padding='same')(up8)
 conv8 = Conv2D(64, (3, 3), activation='relu', padding='same')(conv8)
 
 # 1 3x3 transpose convolution and concate conv3 on the depth dim
-up9 = concatenate([ZeroPadding2D(((0,0),(1,0)))(Conv2DTranspose(32, (2, 2), strides=(2, 2), padding='same')(conv8)), conv1], axis=3)
+up9 = concatenate([ZeroPadding2D(((0, 0), (1, 0)))(
+    Conv2DTranspose(32, (2, 2), strides=(2, 2), padding='same')(conv8)
+), conv1], axis=3)
 
 # 2 3x3 convolutions
 conv9 = Conv2D(32, (3, 3), activation='relu', padding='same')(up9)
 conv9 = Conv2D(32, (3, 3), activation='relu', padding='same')(conv9)
 
-# final 1x1 convolutions to get to the correct depth dim (3 for 2 xy vel and 1 for pressure)
+# final 1x1 convolutions to get to the correct depth dim
+# (3 for 2 xy vel and 1 for pressure)
 conv10 = Conv2D(3, (1, 1), activation='linear')(conv9)
 
 # construct model
@@ -108,7 +124,7 @@ model = Model(inputs=[inputs], outputs=[conv10])
 
 # compile the model with loss and optimizer
 model.compile(loss=keras.losses.mean_squared_error,
-              optimizer=keras.optimizers.Adam(lr=1e-4),
+              optimizer=tf.optimizers.Adam(learning_rate=1e-4),
               metrics=['MSE'])
 
 # train model
@@ -124,16 +140,20 @@ print('Average Mean Squared Error:', score[0])
 
 # display predictions on test set
 predicted_steady_flow = model.predict(test_geometries, batch_size=batch_size)
-for i in xrange(predicted_steady_flow.shape[0]):
-  # plot predicted vs true flow
-  velocity_image = np.concatenate([predicted_steady_flow[i,:,:,0], test_steady_flows[i,:,:,0], test_geometries[i,:,:,0]/10.0], axis=1)
-  plt.imshow(velocity_image)
-  plt.show()
-  # plot predicted vs true pressure
-  velocity_image = np.concatenate([predicted_steady_flow[i,:,:,2], test_steady_flows[i,:,:,2], test_geometries[i,:,:,0]/10.0], axis=1)
-  plt.imshow(velocity_image)
-  plt.show()
- 
-
-
-
+for i in range(predicted_steady_flow.shape[0]):
+    # plot predicted vs true flow
+    velocity_image = np.concatenate([
+        predicted_steady_flow[i, :, :, 0],
+        test_steady_flows[i, :, :, 0],
+        test_geometries[i, :, :, 0]/10.0
+    ], axis=1)
+    plt.imshow(velocity_image)
+    plt.show()
+    # plot predicted vs true pressure
+    velocity_image = np.concatenate([
+        predicted_steady_flow[i, :, :, 2],
+        test_steady_flows[i, :, :, 2],
+        test_geometries[i, :, :, 0]/10.0
+    ], axis=1)
+    plt.imshow(velocity_image)
+    plt.show()
